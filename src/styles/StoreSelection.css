@@ -1,0 +1,122 @@
+.store-selection-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.instructions {
+  margin-bottom: 32px;
+}
+
+.instructions h2 {
+  font-size: 24px;
+  margin-bottom: 8px;
+  color: white;
+}
+
+.instructions p {
+  color: var(--color-text-dim);
+}
+
+.store-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.store-card {
+  overflow: hidden;
+  cursor: pointer;
+  transform: translateY(0);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.store-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.store-image {
+  height: 160px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.store-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.8));
+  display: flex;
+  padding: 16px;
+  align-items: flex-end;
+}
+
+.ai-badge {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: var(--color-success);
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.store-info {
+  padding: 20px;
+}
+
+.store-info h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: white;
+}
+
+.store-meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  color: var(--color-text-dim);
+  font-size: 13px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.store-stats {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 16px;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--color-text-dim);
+}
+
+.traffic-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-value {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.text-danger { color: var(--color-danger); }
+.text-warning { color: var(--color-warning); }
+.text-success { color: var(--color-success); }
