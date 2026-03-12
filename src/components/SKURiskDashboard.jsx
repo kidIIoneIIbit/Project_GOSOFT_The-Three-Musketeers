@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { PackageSearch, Calendar, ArrowRight, Activity, Zap } from 'lucide-react';
-import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, Tooltip, ResponsiveContainer } from 'recharts';
 import { INVENTORY, VENDORS } from '../data/sampleData';
 import RiskBadge from './common/RiskBadge';
 import '../styles/SKURiskDashboard.css';
@@ -21,7 +21,6 @@ const SKURiskDashboard = ({ store, onNext, onBack }) => {
     if (activeCategory !== 'All') {
       items = items.filter(i => i.category === activeCategory);
     }
-    // Sort by risk score descending
     return items.sort((a, b) => b.riskScore - a.riskScore);
   }, [activeCategory]);
 
@@ -30,7 +29,7 @@ const SKURiskDashboard = ({ store, onNext, onBack }) => {
     setTimeout(() => {
       setIsOptimizing(false);
       onNext();
-    }, 1500); // Simulate AI calculation time
+    }, 1500); 
   };
 
   const totalRiskValue = useMemo(() => {
@@ -39,25 +38,29 @@ const SKURiskDashboard = ({ store, onNext, onBack }) => {
 
   return (
     <div className="risk-dashboard-container">
-      {/* Top Action Bar */}
+      {/* Top Action Bar - Minimal & Flex Wrapped */}
       <div className="dashboard-stats glass-panel animate-fade-in">
-        <div className="stat-group">
-          <div className="stat-icon-wrapper danger-glow">
-            <Activity size={24} className="text-danger" />
+        <div className="stats-wrapper">
+          <div className="stat-group">
+            <div className="stat-icon-wrapper danger-glow">
+              <Activity size={20} className="text-danger" />
+            </div>
+            <div className="stat-info">
+              <span className="stat-label">Critical Waste Risk</span>
+              <span className="stat-value number-font text-danger">฿{totalRiskValue.toLocaleString()}</span>
+            </div>
           </div>
-          <div className="stat-info">
-            <span className="stat-label">Critical Waste Risk (THB)</span>
-            <span className="stat-value">฿{totalRiskValue.toLocaleString()}</span>
-          </div>
-        </div>
-        
-        <div className="stat-group">
-          <div className="stat-icon-wrapper warning-glow">
-            <PackageSearch size={24} className="text-warning" />
-          </div>
-          <div className="stat-info">
-            <span className="stat-label">High Risk SKUs</span>
-            <span className="stat-value">{INVENTORY.filter(i => i.riskScore > 70).length} Items</span>
+          
+          <div className="stat-separator"></div>
+
+          <div className="stat-group">
+            <div className="stat-icon-wrapper warning-glow">
+              <PackageSearch size={20} className="text-warning" />
+            </div>
+            <div className="stat-info">
+              <span className="stat-label">High Risk SKUs</span>
+              <span className="stat-value number-font">{INVENTORY.filter(i => i.riskScore > 70).length}</span>
+            </div>
           </div>
         </div>
 
@@ -68,13 +71,13 @@ const SKURiskDashboard = ({ store, onNext, onBack }) => {
         >
           {isOptimizing ? (
             <>
-              <Zap className="spin" size={20} />
-              <span>AI Optimizing...</span>
+              <Zap className="spin" size={18} />
+              <span>AI Optimizing</span>
             </>
           ) : (
             <>
-              <BrainCircuitIcon size={20} />
-              <span>Run AI Optimization</span>
+              <BrainCircuitIcon size={18} />
+              <span>Run AI</span>
               <ArrowRight size={16} />
             </>
           )}
@@ -94,17 +97,17 @@ const SKURiskDashboard = ({ store, onNext, onBack }) => {
         ))}
       </div>
 
-      {/* SKU Table */}
+      {/* SKU Table - Responsive Wrapper */}
       <div className="sku-table-container glass-panel animate-fade-in" style={{ animationDelay: '0.2s' }}>
         <table className="sku-table">
           <thead>
             <tr>
-              <th>SKU Details</th>
-              <th>Vendor Type</th>
-              <th>Inventory</th>
-              <th>Expiry Window</th>
-              <th>Run-Rate Trend</th>
-              <th>AI Risk Score</th>
+              <th>Product Node</th>
+              <th>Vendor Sync</th>
+              <th>Stock State</th>
+              <th>Expiry TTL</th>
+              <th className="hide-mobile">Run-Rate</th>
+              <th>Risk Score</th>
             </tr>
           </thead>
           <tbody>
@@ -115,7 +118,7 @@ const SKURiskDashboard = ({ store, onNext, onBack }) => {
                   <td>
                     <div className="sku-details">
                       <span className="sku-name">{item.name}</span>
-                      <span className="sku-id">{item.id} • {item.category}</span>
+                      <span className="sku-id number-font">{item.id} <span className="text-dim">• {item.category}</span></span>
                     </div>
                   </td>
                   <td>
@@ -124,28 +127,29 @@ const SKURiskDashboard = ({ store, onNext, onBack }) => {
                     </span>
                   </td>
                   <td>
-                    <div className="inventory-details">
-                      <span className="qty">{item.qty} units</span>
-                      <span className="sell-rate">@{item.sellRate}/day</span>
+                    <div className="inventory-details number-font">
+                      <span className="qty">{item.qty} items</span>
+                      <span className="sell-rate text-dim">@{item.sellRate}/d</span>
                     </div>
                   </td>
                   <td>
-                    <div className="expiry-details">
-                      <Calendar size={14} className={item.daysToExpiry <= 1 ? 'text-danger' : 'text-warning'} />
+                    <div className="expiry-details number-font">
+                      <Calendar size={12} className={item.daysToExpiry <= 1 ? 'text-danger' : 'text-primary'} />
                       <span className={item.daysToExpiry <= 1 ? 'text-danger' : ''}>
-                        {item.daysToExpiry} {item.daysToExpiry === 1 ? 'day' : 'days'}
+                        {item.daysToExpiry}d
                       </span>
                     </div>
                   </td>
-                  <td className="sparkline-cell">
-                    <ResponsiveContainer width="100%" height={30}>
+                  <td className="sparkline-cell hide-mobile">
+                    <ResponsiveContainer width="100%" height={24}>
                       <AreaChart data={sparklineData}>
-                        <Tooltip content={<></>} />
+                        <Tooltip content={<></>} cursor={{stroke: 'rgba(255,255,255,0.1)'}} />
                         <Area 
                           type="monotone" 
                           dataKey="sales" 
-                          stroke={item.riskScore > 70 ? '#ef4444' : '#3b82f6'} 
-                          fill={item.riskScore > 70 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(59, 130, 246, 0.2)'} 
+                          stroke={item.riskScore > 70 ? '#FF2A5F' : '#00E5FF'} 
+                          fill="transparent"
+                          strokeWidth={2}
                         />
                       </AreaChart>
                     </ResponsiveContainer>
@@ -161,7 +165,7 @@ const SKURiskDashboard = ({ store, onNext, onBack }) => {
       </div>
 
       <div className="action-bar">
-        <button className="secondary" onClick={onBack}>Back to Stores</button>
+        <button className="secondary" onClick={onBack}>Cancel Operation</button>
       </div>
     </div>
   );

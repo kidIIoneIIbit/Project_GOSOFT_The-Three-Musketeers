@@ -1,14 +1,12 @@
 import { useState } from 'react';
-import { Building2, XCircle, CheckCircle2, Factory, TrendingDown, ArrowRight, PlayCircle } from 'lucide-react';
+import { Building2, XCircle, CheckCircle2, Factory, TrendingDown, PlayCircle } from 'lucide-react';
 import { VENDORS, INVENTORY } from '../data/sampleData';
-import { selectStrategy, simulateVendorImpact } from '../data/optimizationEngine';
+import { simulateVendorImpact } from '../data/optimizationEngine';
 import AnimatedCounter from './common/AnimatedCounter';
 import '../styles/VendorSimulation.css';
 
 const VendorSimulation = ({ store, onNext, onBack }) => {
-  // Find vendors that need approval (Consignment & markdownNotAllowed)
   const approvalVendors = VENDORS.filter(v => v.contractType === 'Consignment' && !v.markdownAllowed);
-  
   const [vendorStatus, setVendorStatus] = useState(
     approvalVendors.reduce((acc, v) => ({ ...acc, [v.id]: 'pending' }), {})
   );
@@ -18,21 +16,15 @@ const VendorSimulation = ({ store, onNext, onBack }) => {
   };
 
   const getSimulatedData = (vendorId) => {
-    // Collect all SKUs for this vendor that are at risk
     const vendorSKUs = INVENTORY.filter(sku => sku.vendorId === vendorId && sku.riskScore > 40);
-    
-    let totalWasteRisk = 0;
-    let totalUplift = 0;
-    let totalMarginLoss = 0;
+    let totalWasteRisk = 0, totalUplift = 0, totalMarginLoss = 0;
 
     vendorSKUs.forEach(sku => {
-      // Simulate impact if markdown was applied
       const impact = simulateVendorImpact(sku, { type: 'MARKDOWN', discount: 30 });
       totalWasteRisk += impact.wasteRiskValue;
       totalUplift += impact.expectedUplift;
       totalMarginLoss += Math.abs(impact.marginDelta);
     });
-
     return { totalWasteRisk, totalUplift, totalMarginLoss, skuCount: vendorSKUs.length };
   };
 
@@ -41,8 +33,8 @@ const VendorSimulation = ({ store, onNext, onBack }) => {
   return (
     <div className="vendor-simulation-container">
       <div className="simulation-header animate-fade-in">
-        <h2>Ecosystem Collaborative Simulation</h2>
-        <p>Real-time portal for vendors to approve mutual-margin clearances and avoid food waste write-offs.</p>
+        <h2>Ecosystem Network Approval</h2>
+        <p className="subtitle-text">Real-time simulation portal for vendor contract nodes.</p>
       </div>
 
       <div className="vendors-list">
@@ -59,58 +51,58 @@ const VendorSimulation = ({ store, onNext, onBack }) => {
               <div className="vendor-header">
                 <div className="vendor-title">
                   <div className="vendor-icon-wrapper">
-                    <Factory size={20} />
+                    <Factory size={20} className="text-primary" />
                   </div>
                   <div>
                     <h3>{vendor.name}</h3>
-                    <span className="vendor-meta">Consignment Partner • {simData.skuCount} SKUs at Risk</span>
+                    <span className="vendor-meta uppercase-dim">Consignment Node • {simData.skuCount} SKUs At Risk</span>
                   </div>
                 </div>
                 
                 <div className="status-badge-container">
-                  {status === 'pending' && <span className="badge pending">Pending Approval</span>}
-                  {status === 'approved' && <span className="badge approved"><CheckCircle2 size={16} /> Co-Fund Approved</span>}
-                  {status === 'rejected' && <span className="badge rejected"><XCircle size={16} /> Rejected</span>}
+                  {status === 'pending' && <span className="badge pending">AWAITING AUTHORIZATION</span>}
+                  {status === 'approved' && <span className="badge approved glow-emerald"><CheckCircle2 size={14} /> AUTHORIZED</span>}
+                  {status === 'rejected' && <span className="badge rejected glow-danger"><XCircle size={14} /> DENIED</span>}
                 </div>
               </div>
 
               <div className="simulation-body">
                 {/* Scenario A: Do Nothing */}
                 <div className="scenario do-nothing">
-                  <h4>Scenario A: Do Nothing</h4>
+                  <h4 className="uppercase-dim">Projection Alpha: Status Quo</h4>
                   <div className="scenario-stat text-danger">
-                    <span>Spoilage Write-off Cost</span>
-                    <strong>฿<AnimatedCounter value={simData.totalWasteRisk} /></strong>
+                    <span>Spoilage Write-off Liability</span>
+                    <strong className="number-font">฿<AnimatedCounter value={simData.totalWasteRisk} /></strong>
                   </div>
-                  <p className="scenario-desc">Items expire, vendor bears 100% cost of unsold consignment stock.</p>
+                  <p className="scenario-desc">100% loss absorption by vendor on expired consignment units.</p>
                 </div>
 
                 <div className="vs-divider">
-                  <span>VS</span>
+                  <span className="number-font">VS</span>
                 </div>
 
                 {/* Scenario B: Approve Clearance */}
                 <div className="scenario approve-clearance">
-                  <h4>Scenario B: V-SCOPS Clearance</h4>
+                  <h4 className="uppercase-dim text-primary">Projection Beta: V-SCOPS Mutual Clearance</h4>
                   <div className="scenario-stat text-warning">
-                    <span>Shared Margin Reduction</span>
-                    <strong><TrendingDown size={14} /> ฿<AnimatedCounter value={simData.totalMarginLoss} /></strong>
+                    <span>Shared Margin Impact</span>
+                    <strong className="number-font"><TrendingDown size={14} /> ฿<AnimatedCounter value={simData.totalMarginLoss} /></strong>
                   </div>
                   <div className="scenario-stat text-success">
-                    <span>Salvaged Revenue</span>
-                    <strong>฿<AnimatedCounter value={simData.totalUplift} /></strong>
+                    <span>Salvaged Liquidity</span>
+                    <strong className="number-font text-success glow-text">฿<AnimatedCounter value={simData.totalUplift} /></strong>
                   </div>
-                  <p className="scenario-desc">Vendor and branch share the discount burden, salvaging capital.</p>
+                  <p className="scenario-desc text-primary">Dynamic cost sharing strategy to salvage capital liquidity.</p>
                 </div>
               </div>
 
               {status === 'pending' && (
                 <div className="vendor-actions">
                   <button className="secondary btn-reject" onClick={() => handleAction(vendor.id, 'rejected')}>
-                    <XCircle size={18} /> Reject
+                    DECLINE ALGORITHM
                   </button>
                   <button className="primary btn-approve" onClick={() => handleAction(vendor.id, 'approved')}>
-                    <CheckCircle2 size={18} /> Approve Mutual Clearance
+                    AUTHORIZE MUTUAL CLEARANCE
                   </button>
                 </div>
               )}
@@ -120,19 +112,19 @@ const VendorSimulation = ({ store, onNext, onBack }) => {
       </div>
 
       <div className="action-bar animate-fade-in" style={{ animationDelay: '0.4s' }}>
-        <button className="secondary" onClick={onBack}>Back to Optimization</button>
+        <button className="secondary" onClick={onBack}>Cancel Operation</button>
         <button 
-          className="primary" 
+          className="primary glow-emerald" 
           onClick={onNext}
           disabled={!allApproved}
         >
           {allApproved ? (
             <>
-              <span>Execute Campaigns</span>
+              <span>Execute Smart Campaigns</span>
               <PlayCircle size={18} />
             </>
           ) : (
-            <span>Waiting for Vendor Approvals...</span>
+            <span>Awaiting Vendor Authorizations</span>
           )}
         </button>
       </div>

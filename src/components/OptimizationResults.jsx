@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
-import { Tag, PackageOpen, Handshake, ArrowRight, TrendingUp, TrendingDown } from 'lucide-react';
+import { useMemo } from 'react';
+import { Tag, PackageOpen, Handshake, ArrowRight, TrendingUp } from 'lucide-react';
 import { AreaChart, Area, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { INVENTORY, VENDORS } from '../data/sampleData';
+import { INVENTORY } from '../data/sampleData';
 import { selectStrategy } from '../data/optimizationEngine';
 import '../styles/OptimizationResults.css';
 
@@ -11,26 +11,19 @@ const chartData = [
 ];
 
 const OptimizationResults = ({ store, onNext, onBack }) => {
-  // Compute strategies
   const optimizationStats = useMemo(() => {
-    let markdownCount = 0;
-    let bundleCount = 0;
-    let vendorCount = 0;
-    let estimatedMarginUplift = 0;
+    let markdownCount = 0, bundleCount = 0, vendorCount = 0, estimatedMarginUplift = 0;
 
     INVENTORY.forEach(sku => {
       const strategy = selectStrategy(sku);
       if (strategy.type === 'MARKDOWN') {
-        markdownCount++;
-        estimatedMarginUplift += (sku.price * sku.qty * 0.15); // Simulated uplift
+        markdownCount++; estimatedMarginUplift += (sku.price * sku.qty * 0.15); 
       }
       if (strategy.type === 'BUNDLE') {
-        bundleCount++;
-        estimatedMarginUplift += (sku.price * sku.qty * 0.25);
+        bundleCount++; estimatedMarginUplift += (sku.price * sku.qty * 0.25);
       }
       if (strategy.type === 'VENDOR_APPROVAL') {
-        vendorCount++;
-        estimatedMarginUplift += (sku.price * sku.qty * 0.10);
+        vendorCount++; estimatedMarginUplift += (sku.price * sku.qty * 0.10);
       }
     });
 
@@ -39,107 +32,96 @@ const OptimizationResults = ({ store, onNext, onBack }) => {
 
   return (
     <div className="optimization-results-container">
-      {/* Overview Headings */}
       <div className="results-header animate-fade-in">
-        <h2>AI Orchestration Summary</h2>
-        <p>V-SCOPS has analyzed vendor contracts and inventory to suggest the most profitable clearance strategies.</p>
+        <h2>AI Strategy Formulation</h2>
+        <p className="subtitle-text">Profit orchestration strategies computed successfully.</p>
       </div>
 
-      {/* Main KPI Card */}
       <div className="main-kpi-card glass-panel animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <div className="kpi-info">
-          <div className="kpi-label">Projected Margin Uplift vs Doing Nothing</div>
-          <div className="kpi-value text-success">
+          <div className="kpi-label">Projected Margin Uplift Value</div>
+          <div className="kpi-value text-primary number-font">
             +฿{Math.round(optimizationStats.estimatedMarginUplift).toLocaleString()}
           </div>
-          <div className="kpi-insight">
-            <TrendingUp size={16} /> <span>18.4% improvement in net branch profit</span>
+          <div className="kpi-insight glow-emerald">
+            <TrendingUp size={14} className="text-success" /> 
+            <span><strong className="text-success number-font">18.4%</strong> Net Profit Increase</span>
           </div>
         </div>
-        <div className="kpi-chart">
-          <ResponsiveContainer width="100%" height={100}>
+        <div className="kpi-chart hide-mobile">
+          <ResponsiveContainer width="100%" height={120}>
             <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorMargin" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#00FF9D" stopOpacity={0.6}/>
+                  <stop offset="95%" stopColor="#00FF9D" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <XAxis dataKey="time" hide />
-              <Tooltip formatter={(value) => [`${value}%`, 'Margin']} />
-              <Area type="monotone" dataKey="margin" stroke="#10b981" fillOpacity={1} fill="url(#colorMargin)" />
+              <Tooltip cursor={{stroke: 'rgba(255,255,255,0.1)'}} contentStyle={{background: '#070B18', border: '1px solid #00E5FF'}} />
+              <Area type="monotone" dataKey="margin" stroke="#00FF9D" strokeWidth={3} fillOpacity={1} fill="url(#colorMargin)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Strategy Breakdown */}
       <div className="strategy-grid">
-        <div className="strategy-card glass-panel animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <div className="strategy-icon markdown-icon">
-            <Tag size={24} />
-          </div>
-          <h3>Smart Markdown</h3>
-          <p className="strategy-desc">Direct price cuts for self-owned inventory or allowed vendors.</p>
-          <div className="strategy-stats">
-            <div className="stat-line">
-              <span>Affected SKUs</span>
-              <strong>{optimizationStats.markdownCount} Items</strong>
-            </div>
-            <div className="stat-line text-success">
-              <span>Win Rate</span>
-              <strong>High</strong>
-            </div>
-          </div>
-        </div>
+        <StrategyCard 
+          icon={Tag} 
+          title="Smart Markdown" 
+          desc="Algorithmically optimized price cuts for self-owned inventory." 
+          statLabel="SKUs Analyzed"
+          statValue={optimizationStats.markdownCount}
+          accent="primary"
+          delay="0.2s"
+        />
 
-        <div className="strategy-card glass-panel animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <div className="strategy-icon bundle-icon">
-            <PackageOpen size={24} />
-          </div>
-          <h3>Smart Bundle</h3>
-          <p className="strategy-desc">Cross-selling expiring items with high-margin drinks to absorb cost.</p>
-          <div className="strategy-stats">
-            <div className="stat-line">
-              <span>Affected SKUs</span>
-              <strong>{optimizationStats.bundleCount} Combos</strong>
-            </div>
-            <div className="stat-line text-success">
-              <span>Avg Margin</span>
-              <strong>28% </strong>
-            </div>
-          </div>
-        </div>
+        <StrategyCard 
+          icon={PackageOpen} 
+          title="Smart Bundle" 
+          desc="Cross-linked clearance with high-margin items to absorb discount costs." 
+          statLabel="Combo Pairs Generated"
+          statValue={optimizationStats.bundleCount}
+          accent="success"
+          delay="0.3s"
+        />
 
-        <div className="strategy-card glass-panel animate-fade-in" style={{ animationDelay: '0.4s' }}>
-          <div className="strategy-icon vendor-icon">
-            <Handshake size={24} />
-          </div>
-          <h3>Vendor Co-Funded</h3>
-          <p className="strategy-desc">Requesting mutual margin reduction for restricted consignment items.</p>
-          <div className="strategy-stats">
-            <div className="stat-line">
-              <span>Pending Approvals</span>
-              <strong>{optimizationStats.vendorCount} Vendors</strong>
-            </div>
-            <div className="stat-line text-warning">
-              <span>Action Required</span>
-              <strong>Simulate &rarr;</strong>
-            </div>
-          </div>
-        </div>
+        <StrategyCard 
+          icon={Handshake} 
+          title="Vendor Co-Funded" 
+          desc="Automated margin-sharing negotiation for restricted consignment stock." 
+          statLabel="Pending Approvals"
+          statValue={optimizationStats.vendorCount}
+          accent="warning"
+          delay="0.4s"
+        />
       </div>
 
-      {/* Action Bar */}
       <div className="action-bar animate-fade-in" style={{ animationDelay: '0.5s' }}>
-        <button className="secondary" onClick={onBack}>Back to Dashboard</button>
-        <button className="primary" onClick={onNext}>
-          <span>View Vendor Simulations</span>
+        <button className="secondary" onClick={onBack}>Cancel Operation</button>
+        <button className="primary glow-cyan" onClick={onNext}>
+          <span>Execute Vendor Protocol</span>
           <ArrowRight size={16} />
         </button>
       </div>
     </div>
   );
 };
+
+const StrategyCard = ({ icon: Icon, title, desc, statLabel, statValue, accent, delay }) => (
+  <div className={`strategy-card glass-panel accent-${accent} animate-fade-in`} style={{ animationDelay: delay }}>
+    <div className={`strategy-icon-wrapper text-${accent}`}>
+      <Icon size={24} />
+    </div>
+    <div className="strategy-content">
+      <h3>{title}</h3>
+      <p className="strategy-desc">{desc}</p>
+      <div className="strategy-stats">
+        <span className="stat-label text-dim">{statLabel}</span>
+        <strong className="stat-value number-font">{statValue}</strong>
+      </div>
+    </div>
+  </div>
+);
 
 export default OptimizationResults;
